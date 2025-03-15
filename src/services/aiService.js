@@ -1,11 +1,7 @@
-// This service handles direct API calls to OpenRouter AI from the frontend
+// This service handles communication with the backend proxy server on Render.com
 
-// API configuration
-// Example modification (not recommended for production)
-const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
-const API_URL = `${CORS_PROXY}https://openrouter.ai/api/v1/chat/completions`;
-const API_KEY = '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';
-const MODEL = 'deepseek/deepseek-r1:free';
+// Point directly to your Render.com backend
+const BACKEND_URL = 'https://pokkathefuturewithai.onrender.com/api/chat';
 
 // Show a prominent console warning about API key exposure
 const showSecurityWarning = () => {
@@ -22,73 +18,49 @@ showSecurityWarning();
 
 export const getAIResponse = async (userMessage) => {
   try {
-    // For GitHub Pages deployment, show the warning again on each API call
-    if (process.env.NODE_ENV === 'production') {
-      showSecurityWarning();
-    }
+    console.log('Sending request to backend proxy at:', BACKEND_URL);
     
-    console.log('Sending request to OpenRouter API...');
-    console.log('Current location:', window.location.href);
-    
-    // Create request options with proper headers for CORS
-    const requestOptions = {
+    // Send request to your backend proxy server instead of directly to OpenRouter
+    const response = await fetch(BACKEND_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Add API key in the format OpenRouter expects
-        'Authorization': `Bearer ${API_KEY}`,
-        // These headers are required by OpenRouter
-        'HTTP-Referer': window.location.origin,
-        'X-Title': 'AI Chat Demo',
-        // Add CORS headers that might help
-        'Origin': window.location.origin
+        // No need to include API key here as the backend handles it
       },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [{ role: 'user', content: userMessage }],
-        // Add extra parameters that might help
-        stream: false,
-        max_tokens: 500
+      body: JSON.stringify({ 
+        message: userMessage
       }),
-    };
-    
-    console.log('Request headers:', requestOptions.headers);
-    
-    const response = await fetch(API_URL, requestOptions);
+    });
 
     console.log('Response status:', response.status);
-    console.log('Response headers:', Object.fromEntries([...response.headers]));
-
+    
     // Handle API error responses
     if (!response.ok) {
       let errorMessage = `API error: ${response.status}`;
       try {
         const errorData = await response.json();
         console.error('Error data from API:', errorData);
-        errorMessage += ` - ${errorData.error?.message || 'Unknown error'}`;
+        errorMessage += ` - ${errorData.error || errorData.message || 'Unknown error'}`;
       } catch (jsonError) {
         console.error('Could not parse error response as JSON:', jsonError);
-        errorMessage += ' - Could not parse error details';
       }
       throw new Error(errorMessage);
     }
 
     const data = await response.json();
-    console.log('API response received:', data);
+    console.log('Response received successfully');
     
-    // Extract and return the AI's response text
-    return data.choices[0].message.content;
+    // Return the response from your backend proxy
+    return data.response;
   } catch (error) {
-    console.error('Error in AI API request:', error);
+    console.error('Error in API request:', error);
     
-    // Return a user-friendly error message
     if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
-      return "Network error. Please check your internet connection and try again.";
+      return "Network error. Please check if the backend server is running and accessible.";
     }
     
-    // For GitHub Pages deployment - provide a more helpful error message
-    if (error.message?.includes('401')) {
-      return "Authentication error occurred. When deployed on GitHub Pages, direct API calls may be restricted. Consider using a backend proxy server. Check the console for more details.";
+    if (error.message?.includes('403')) {
+      return "Access forbidden. The backend server may be blocking requests from this domain. Check CORS configuration on your backend server.";
     }
     
     return `Sorry, I couldn't process your request. Error: ${error.message || 'Unknown error'}`;
@@ -98,7 +70,7 @@ export const getAIResponse = async (userMessage) => {
 // Additional helper method that could be useful for future features
 export const checkAPIStatus = async () => {
   try {
-    const response = await fetch(`${API_URL}/models`, {
+    const response = await fetch(`${BACKEND_URL}/models`, {
       headers: {
         'Authorization': `Bearer ${API_KEY}`,
       }

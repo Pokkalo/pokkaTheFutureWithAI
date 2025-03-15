@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ChatMessage from './ChatMessage';
 import { getAIResponse } from '../services/aiService';
-import { getFallbackResponse } from '../services/fallbackService';
 import { saveConversation } from '../services/storageService';
 import '../styles/chat.css';
 
@@ -32,20 +31,8 @@ const ChatInterface = () => {
     console.log('Sending message:', input);
     
     try {
-      // Try to get AI response
-      let response;
-      try {
-        response = await getAIResponse(input);
-        
-        // If response contains authentication error message, use fallback
-        if (response.includes("Authentication error occurred")) {
-          console.warn("Authentication error detected, switching to fallback mode");
-          response = await getFallbackResponse(input);
-        }
-      } catch (apiError) {
-        console.error("API call failed, using fallback response", apiError);
-        response = await getFallbackResponse(input);
-      }
+      // Get AI response
+      const response = await getAIResponse(input);
       
       // Add AI message
       const aiMessage = { id: Date.now() + 1, text: response, sender: 'ai' };
@@ -57,7 +44,7 @@ const ChatInterface = () => {
       console.error('Error getting AI response:', error);
       setMessages(prevMessages => [
         ...prevMessages, 
-        { id: Date.now() + 1, text: 'Sorry, I had trouble processing that request.', sender: 'ai' }
+        { id: Date.now() + 1, text: 'Sorry, I had trouble processing that request. Please check if the backend server is running.', sender: 'ai' }
       ]);
     } finally {
       setIsLoading(false);
