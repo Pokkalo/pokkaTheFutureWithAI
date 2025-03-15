@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/pokkaTheFutureWithAI/static/css/main.2bc3283b.css",
-    "main.js": "/pokkaTheFutureWithAI/static/js/main.4585c652.js",
+    "main.css": "/pokkaTheFutureWithAI/static/css/main.d34170c6.css",
+    "main.js": "/pokkaTheFutureWithAI/static/js/main.5d5b70bc.js",
     "index.html": "/pokkaTheFutureWithAI/index.html",
-    "main.2bc3283b.css.map": "/pokkaTheFutureWithAI/static/css/main.2bc3283b.css.map",
-    "main.4585c652.js.map": "/pokkaTheFutureWithAI/static/js/main.4585c652.js.map"
+    "main.d34170c6.css.map": "/pokkaTheFutureWithAI/static/css/main.d34170c6.css.map",
+    "main.5d5b70bc.js.map": "/pokkaTheFutureWithAI/static/js/main.5d5b70bc.js.map"
   },
   "entrypoints": [
-    "static/css/main.2bc3283b.css",
-    "static/js/main.4585c652.js"
+    "static/css/main.d34170c6.css",
+    "static/js/main.5d5b70bc.js"
   ]
 }
