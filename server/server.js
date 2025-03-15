@@ -14,7 +14,10 @@ app.use(cors());
 app.use(express.json());
 
 // OpenRouter API endpoint
-const AI_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+// Example modification (not recommended for production)
+const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
+const AI_API_URL = `${CORS_PROXY}https://openrouter.ai/api/v1/chat/completions`;
+// const AI_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const API_KEY = process.env.AI_API_KEY || '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';
 
 // API proxy endpoint
