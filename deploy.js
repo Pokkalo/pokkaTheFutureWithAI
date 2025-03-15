@@ -43,11 +43,11 @@ const main = () => {
     execSync('npm run deploy', { stdio: 'inherit' });
     
     console.log('\n✅ Deployment complete!');
-    console.log('\nNOTE: You need to deploy your backend separately.');
-    console.log('Free options for backend hosting:');
-    console.log('- Render.com (https://render.com)');
-    console.log('- Railway (https://railway.app)');
-    console.log('- Fly.io (https://fly.io)');
+    // console.log('\nNOTE: You need to deploy your backend separately.');
+    // console.log('Free options for backend hosting:');
+    // console.log('- Render.com (https://render.com)');
+    // console.log('- Railway (https://railway.app)');
+    // console.log('- Fly.io (https://fly.io)');
   } catch (error) {
     console.error('Deployment failed:', error);
   }

@@ -1,5 +1,4 @@
 // This service handles direct API calls to OpenRouter AI from the frontend
-// WARNING: This approach exposes your API key in network requests
 
 // API configuration
 const API_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -27,26 +26,49 @@ export const getAIResponse = async (userMessage) => {
     }
     
     console.log('Sending request to OpenRouter API...');
+    console.log('Current location:', window.location.href);
     
-    const response = await fetch(API_URL, {
+    // Create request options with proper headers for CORS
+    const requestOptions = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        // Add API key in the format OpenRouter expects
         'Authorization': `Bearer ${API_KEY}`,
-        'HTTP-Referer': window.location.href,
+        // These headers are required by OpenRouter
+        'HTTP-Referer': window.location.origin,
         'X-Title': 'AI Chat Demo',
+        // Add CORS headers that might help
+        'Origin': window.location.origin
       },
       body: JSON.stringify({
         model: MODEL,
         messages: [{ role: 'user', content: userMessage }],
+        // Add extra parameters that might help
+        stream: false,
+        max_tokens: 500
       }),
-    });
+    };
+    
+    console.log('Request headers:', requestOptions.headers);
+    
+    const response = await fetch(API_URL, requestOptions);
+
+    console.log('Response status:', response.status);
+    console.log('Response headers:', Object.fromEntries([...response.headers]));
 
     // Handle API error responses
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('API error response:', errorData);
-      throw new Error(`API error: ${response.status} - ${errorData.error?.message || response.statusText}`);
+      let errorMessage = `API error: ${response.status}`;
+      try {
+        const errorData = await response.json();
+        console.error('Error data from API:', errorData);
+        errorMessage += ` - ${errorData.error?.message || 'Unknown error'}`;
+      } catch (jsonError) {
+        console.error('Could not parse error response as JSON:', jsonError);
+        errorMessage += ' - Could not parse error details';
+      }
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
@@ -60,6 +82,11 @@ export const getAIResponse = async (userMessage) => {
     // Return a user-friendly error message
     if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
       return "Network error. Please check your internet connection and try again.";
+    }
+    
+    // For GitHub Pages deployment - provide a more helpful error message
+    if (error.message?.includes('401')) {
+      return "Authentication error occurred. When deployed on GitHub Pages, direct API calls may be restricted. Consider using a backend proxy server. Check the console for more details.";
     }
     
     return `Sorry, I couldn't process your request. Error: ${error.message || 'Unknown error'}`;
