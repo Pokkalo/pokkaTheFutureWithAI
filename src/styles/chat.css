@@ -148,3 +148,63 @@
     transform: translateY(-5px);
   }
 }
+
+/* System messages styling */
+.message .message-bubble .system-message {
+  background-color: #f8f9fa;
+  border-left: 4px solid #6c757d;
+  padding: 8px 12px;
+  margin: 8px 0;
+  font-style: italic;
+  color: #6c757d;
+}
+
+/* Server status indicator */
+.server-status {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 8px;
+  background-color: rgba(255, 152, 0, 0.1);
+  z-index: 10;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.server-waking-up {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.pulse {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #ff9800;
+  box-shadow: 0 0 0 rgba(255, 152, 0, 0.4);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 152, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
+  }
+}
+
+/* System message */
+.message-content.system {
+  background-color: #f8f9fa;
+  border-left: 4px solid #ff9800;
+  font-style: italic;
+  color: #555;
+}

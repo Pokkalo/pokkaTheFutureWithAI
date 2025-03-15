@@ -11,10 +11,11 @@ const port = process.env.PORT || 5000;
 
 // Enhanced CORS configuration to allow requests from GitHub Pages
 const corsOptions = {
-  origin: ['https://lo1pak1hang.github.io', 'http://localhost:3000'],
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  origin: ['https://lo1pak1hang.github.io', 'http://localhost:3000', '*'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   credentials: true,
-  optionsSuccessStatus: 204
+  optionsSuccessStatus: 204,
+  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept']
 };
 
 // Apply CORS middleware with options

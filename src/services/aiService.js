@@ -16,17 +16,49 @@ const showSecurityWarning = () => {
 // Show the warning once when the service is first loaded
 showSecurityWarning();
 
+// Check if Render.com service is awake
+const wakeupRenderService = async () => {
+  try {
+    const response = await fetch('https://pokkathefuturewithai.onrender.com/health', {
+      method: 'GET',
+      mode: 'cors',
+      cache: 'no-cache',
+    });
+    
+    if (response.ok) {
+      console.log('Render service is awake and responding');
+      return true;
+    } else {
+      console.warn('Render service health check failed with status:', response.status);
+      return false;
+    }
+  } catch (error) {
+    console.error('Could not wake up Render service:', error);
+    return false;
+  }
+};
+
+// Try to wake up the service on module load
+wakeupRenderService();
+
 export const getAIResponse = async (userMessage) => {
   try {
+    // Try to wake up the service first
+    await wakeupRenderService();
+    
     console.log('Sending request to backend proxy at:', BACKEND_URL);
     
-    // Send request to your backend proxy server instead of directly to OpenRouter
+    // Send request to your backend proxy server with specific options for CORS
     const response = await fetch(BACKEND_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // No need to include API key here as the backend handles it
+        'Accept': 'application/json',
+        'Origin': window.location.origin,
       },
+      mode: 'cors', // Explicitly request CORS
+      cache: 'no-cache', // Don't use cached responses
+      credentials: 'same-origin', // Include credentials only for same origin
       body: JSON.stringify({ 
         message: userMessage
       }),
@@ -55,14 +87,17 @@ export const getAIResponse = async (userMessage) => {
   } catch (error) {
     console.error('Error in API request:', error);
     
-    if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
-      return "Network error. Please check if the backend server is running and accessible.";
+    // Handle specific error cases
+    if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError') || error.message?.includes('Network Error')) {
+      // Give a more helpful error message about Render.com's free tier
+      return "Network error connecting to the backend. Render.com's free tier may have put the service to sleep due to inactivity. Please try again in a moment while the server wakes up (it can take up to 30-60 seconds for the first request).";
     }
     
     if (error.message?.includes('403')) {
-      return "Access forbidden. The backend server may be blocking requests from this domain. Check CORS configuration on your backend server.";
+      return "Access forbidden. The backend server may be blocking requests from GitHub Pages. Check CORS configuration on your backend server.";
     }
     
+    // General error case
     return `Sorry, I couldn't process your request. Error: ${error.message || 'Unknown error'}`;
   }
 };
@@ -70,13 +105,10 @@ export const getAIResponse = async (userMessage) => {
 // Additional helper method that could be useful for future features
 export const checkAPIStatus = async () => {
   try {
-    const response = await fetch(`${BACKEND_URL}/models`, {
-      headers: {
-        'Authorization': `Bearer ${API_KEY}`,
-      }
-    });
-    return response.ok;
+    // Use the backend health check endpoint
+    return await wakeupRenderService();
   } catch (error) {
+    console.error('Health check failed:', error);
     return false;
   }
 };
